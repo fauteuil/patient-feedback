@@ -1,23 +1,23 @@
-type Name = {
+export type Name = {
   text?: string;
   family?: string;
   given?: string[];
 };
 
-type Contact = {
+export type Contact = {
   system?: string;
   value?: string;
   use?: string;
 };
 
-type Address = {
+export type Address = {
   use?: string;
   line?: string[];
 };
 
-type Patient = {
-  resourceType: string;
-  id: string;
+export type Patient = Resource & {
+  // resourceType: string;
+  // id: string;
   active?: boolean;
   name?: Name[];
   contact?: Contact[];
@@ -26,61 +26,87 @@ type Patient = {
   address?: Address[];
 };
 
-type Doctor = {
-  resourceType: string;
-  id: string;
+export type Doctor = Resource & {
+  // resourceType: string;
+  // id: string;
   name?: Name[];
 };
 
-type Period = {
+export type Period = {
   start: string;
   end: string;
 };
 
-type Type = {
+export type AppointmentType = {
   text?: string;
 };
 
-type Reference = {
+export type Reference = {
   reference: string;
 };
 
-type Appointment = {
-  resourceType: string;
-  id: string;
+export type Appointment = Resource & {
+  // resourceType: string;
+  // id: string;
   status?: string;
-  type?: Type[];
+  type?: AppointmentType[];
   subject?: Reference;
   actor?: Reference;
   period?: Period;
 };
 
-type Coding = {
+export type Coding = {
   system?: string;
   code?: string;
   name?: string;
 };
 
-type Code = {
+export type Code = {
   coding: Coding[];
 };
 
-type Diagnosis = {
-  resourceType: string;
-  id: string;
+export type Diagnosis = Resource & {
+  // resourceType: string;
+  // id: string;
   meta?: { lastUpdated: string };
   status?: string;
   code?: Code;
   appointment?: Reference;
 };
 
-type Entry = {
-  resource: Patient | Doctor | Appointment | Diagnosis;
+export type FeedbackQuestion = {
+  comment?: string;
+  id: string;
+  name: string;
+  type: boolean;
+  value: string;
 };
 
-type Bundle = {
+export type PatientFeedback = Resource & {
+  // resourceType: string;
+  // id: string;
+  meta?: { lastUpdated: string };
+  status?: string;
+  questions?: FeedbackQuestion;
+  diagnosis?: Reference;
+};
+
+export type ResourceType = {
+  resource:
+    | Partial<Patient>
+    | Partial<Doctor>
+    | Partial<Appointment>
+    | Partial<Diagnosis>
+    | Partial<PatientFeedback>;
+};
+
+type Resource = { resourceType: string; id: string };
+
+// export type ResourceType = Partial<Patient | Doctor | Appointment | Diagnosis | PatientFeedback>;
+
+export type Bundle = {
   resourceType: string;
   id: string;
   timestamp: string;
-  entry: Entry[];
+  entry: ResourceType[];
 };
