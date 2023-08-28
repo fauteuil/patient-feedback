@@ -132,7 +132,7 @@ export function FeedbackForm() {
   // const { reset, handleSubmit, watch } = methods;
   const {
     register,
-    getFieldState,
+    // getFieldState,
     handleSubmit,
     formState: { errors },
     trigger,
@@ -157,14 +157,15 @@ export function FeedbackForm() {
   const [diagnosis, setDiagnosis] = useState<Diagnosis>();
   // const [appointment, setAppointment] = useState<Appointment>(); // TODO: parse and display appointment data for more complete context to the questionnaire
   // const [patientFeedback, setPatientFeedback] = useState<PatientFeedback>();
-  const [feedbackFormData, setFeedbackFormData] = useState<PatientFeedbackFormData>(
-    DEFAULT_PATIENT_FEEDBACK_FORM_DATA,
-  );
+  const [feedbackFormData, setFeedbackFormData] = useState<
+    PatientFeedbackFormData & { complete: boolean }
+  >({ ...DEFAULT_PATIENT_FEEDBACK_FORM_DATA, complete: false });
 
   // Pares and persist response data
   const onSubmit: SubmitHandler<PatientFeedbackFormData> = useCallback(feedbackFormData => {
     console.log('feedbackFormData', feedbackFormData);
-    setFeedbackFormData(feedbackFormData);
+    setFeedbackFormData({ ...feedbackFormData, complete: true });
+    setFormStep(-1);
     // const updatedPatientFeedback = { ...patientFeedback };
     // (updatedPatientFeedback?.questions || []).forEach(question => { });
   }, []);
@@ -184,8 +185,6 @@ export function FeedbackForm() {
 
   // Fetch data to specify context for the form fields.
   useEffect(() => {
-
-
     switch (formStep) {
       case 0: {
         setFocus('recommendDoctor');
@@ -202,9 +201,6 @@ export function FeedbackForm() {
       default:
         setFocus('recommendDoctor');
     }
-
-
-
 
     // setFocus('recommendDoctor');
   }, [formStep, setFocus]);
@@ -253,7 +249,9 @@ export function FeedbackForm() {
           required: `${FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title} is a required field`,
         })}
       >
-        <option value={''} selected>-</option>
+        <option value={''} selected>
+          -
+        </option>
         <option value={'yes'}>Yes</option>
         <option value={'no'}>No</option>
       </select>
@@ -314,13 +312,13 @@ export function FeedbackForm() {
         break;
       }
       case 1: {
-        setFocus('diagnosisExplanationSatisfaction');
-        const diagnosisExplanationSatisfactionState = getFieldState('recommendDoctor');
+        // setFocus('diagnosisExplanationSatisfaction');
+        // const diagnosisExplanationSatisfactionState = getFieldState('recommendDoctor');
         await trigger('diagnosisExplanationSatisfaction');
         break;
       }
       case 2: {
-        setFocus('diagnosisResponse');
+        // setFocus('diagnosisResponse');
         await trigger('diagnosisResponse');
         break;
       }
@@ -344,28 +342,37 @@ export function FeedbackForm() {
       {feedbackQuestions.map(question => (
         <div key={question.id}>{question.name}</div>
       ))} */}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {formFields.map((FieldComponent, index) => {
-          return formStep === index ? (
-            <>
-              {FieldComponent}
-              <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
-                Back
-              </button>
-              <button
-                disabled={formStep === formFields.length - 1}
-                onClick={handleFormStepNavigation(formStep + 1)}
-              >
-                Continue
-              </button>
-            </>
-          ) : (
-            <></>
-          );
-        })}
-        {formStep === formFields.length - 1 ? <input type='submit' /> : null}
-      </form>
-      Results:{JSON.stringify(feedbackFormData, undefined, 2)}
+
+
+      {feedbackFormData.complete ? (<div>{FEEDBACK_FORM_COPY.feedbackCompletionHeader}
+        <div>
+          {JSON.stringify(feedbackFormData, undefined, 2)}
+        </div>
+      </div>) :
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+
+          {formFields.map((FieldComponent, index) => {
+            return formStep === index ? (
+              <>
+                {FieldComponent}
+                <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
+                  Back
+                </button>
+                <button
+                  disabled={formStep === formFields.length - 1}
+                  onClick={handleFormStepNavigation(formStep + 1)}
+                >
+                  Continue
+                </button>
+              </>
+            ) : (
+              <></>
+            );
+          })}
+          {formStep === formFields.length - 1 ? <input type='submit' /> : null}
+        </form>
+      }
     </>
   );
 }
