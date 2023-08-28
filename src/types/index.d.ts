@@ -1,7 +1,7 @@
 export type Name = {
-  text?: string;
-  family?: string;
-  given?: string[];
+  text: string;
+  family: string;
+  given: string[];
 };
 
 export type Contact = {
@@ -19,7 +19,7 @@ export type Patient = Resource & {
   // resourceType: string;
   // id: string;
   active?: boolean;
-  name?: Name[];
+  name: Name[];
   contact?: Contact[];
   gender?: string;
   birthDate?: string;
@@ -29,7 +29,7 @@ export type Patient = Resource & {
 export type Doctor = Resource & {
   // resourceType: string;
   // id: string;
-  name?: Name[];
+  name: Name[];
 };
 
 export type Period = {
@@ -58,7 +58,7 @@ export type Appointment = Resource & {
 export type Coding = {
   system?: string;
   code?: string;
-  name?: string;
+  name: string;
 };
 
 export type Code = {
@@ -70,15 +70,15 @@ export type Diagnosis = Resource & {
   // id: string;
   meta?: { lastUpdated: string };
   status?: string;
-  code?: Code;
+  code: Code;
   appointment?: Reference;
 };
 
-export type FeedbackQuestion = {
+export type FeedbackQuestion<T> = {
   comment?: string;
   id: string;
   name: string;
-  type: boolean;
+  valueType: T;
   value: string;
 };
 
@@ -87,17 +87,12 @@ export type PatientFeedback = Resource & {
   // id: string;
   meta?: { lastUpdated: string };
   status?: string;
-  questions?: FeedbackQuestion;
+  questions?: FeedbackQuestion[];
   diagnosis?: Reference;
 };
 
 export type ResourceType = {
-  resource:
-    | Partial<Patient>
-    | Partial<Doctor>
-    | Partial<Appointment>
-    | Partial<Diagnosis>
-    | Partial<PatientFeedback>;
+  resource: Partial<Patient | Doctor | Appointment | Diagnosis | PatientFeedback>;
 };
 
 type Resource = { resourceType: string; id: string };

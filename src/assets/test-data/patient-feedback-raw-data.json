@@ -105,22 +105,22 @@
           {
             "comment": "",
             "id": "blah-8ygvb-blah",
-            "name": "Recommend Doctor",
-            "type": "int",
-            "value": ""
+            "name": "recommendDoctor",
+            "value": "",
+            "valueType": "int"
           },
           {
             "comment": "",
             "id": "blah-8yg3edcvb-blah",
-            "name": "Diagnosis Explanation",
-            "type": "boolean",
-            "value": ""
+            "name": "diagnosisExplanation",
+            "value": "",
+            "valueType": "boolean"
           },
           {
             "id": "blah-8ygvb-blah",
-            "name": "Diagnosis Response",
-            "type": "string",
-            "value": ""
+            "name": "diagnosisResponse",
+            "value": "",
+            "valueType": "string"
           }
         ]
       },
