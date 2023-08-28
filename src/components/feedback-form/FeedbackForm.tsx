@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   // Appointment,
   Bundle,
@@ -11,8 +11,8 @@ import {
 // import { useForm } from "react-hook-form";
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { PatientFeedbackFormData } from '.';
-import { FormFieldWrapper } from './FormFieldWrapper';
 import { FEEDBACK_FORM_COPY } from './constants';
+import { FormFieldInstructions, FormFieldWrapper } from './FeedbackForm.styled';
 
 // function App() {
 //   const { register } = useForm<UserInput>();
@@ -64,7 +64,7 @@ const fetchBundle = async () => {
 // };
 
 /**
- * @todo - wrap in useCallback()
+ * @todo - wrap individual resource parsing into useCallback()
  * @param {Bundle} bundle
  * @returns {Patient} patient
  */
@@ -133,11 +133,10 @@ export function FeedbackForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<PatientFeedbackFormData>();
+    trigger,
+  } = useForm<PatientFeedbackFormData>({ mode: 'onTouched' });
 
-  const onSubmit: SubmitHandler<PatientFeedbackFormData> = data => console.log(data);
-
-  const [formStep, setFormStep] = useState<string>(''); //TOOD: manage form step by service response and/or app state library, e.g. ReactCcntext
+  const [formStep, setFormStep] = useState<number>(0); //TOOD: manage form step by service response and/or app state library, e.g. ReactCcntext
   // const [feedbackQuestions, setFeedbackQuestions] = useState<FeedbackQuestion[]>([]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -145,8 +144,15 @@ export function FeedbackForm() {
   const [patient, setPatient] = useState<Patient>();
   const [doctor, setDoctor] = useState<Doctor>();
   const [diagnosis, setDiagnosis] = useState<Diagnosis>();
-  // const [appointment, setAppointment] = useState<Appointment>(); // TODO: parse and display  appointment data for better context
+  // const [appointment, setAppointment] = useState<Appointment>(); // TODO: parse and display appointment data for more complete context to the questionnaire
   // const [patientFeedback, setPatientFeedback] = useState<PatientFeedback>();
+
+  // Pares and persist response data
+  const onSubmit: SubmitHandler<PatientFeedbackFormData> = useCallback(feedbackFormData => {
+    console.log('feedbackFormData', feedbackFormData);
+    // const updatedPatientFeedback = { ...patientFeedback };
+    // (updatedPatientFeedback?.questions || []).forEach(question => { });
+  }, []);
 
   // Display values
   const patientFirstName = useMemo(() => {
@@ -161,16 +167,8 @@ export function FeedbackForm() {
     );
   }, [diagnosis?.code.coding]);
 
-  const handleFormStepNavigation = (formStepId: string) => () => {
-    setFormStep(formStepId);
-  };
-
-  // Fetch data to populate the form
+  // Fetch data to specify context for the form fields.
   useEffect(() => {
-    // const populateFields = () => {
-
-    // }
-    // populateFields();
     fetchBundle().then(bundleResponse => {
       // console.log('data', data);
       console.log('bundle', bundleResponse);
@@ -182,62 +180,115 @@ export function FeedbackForm() {
     });
   }, []);
 
-  // useEffect(() => {
-  //   // const populateFields = () => {
+  const formFieldKeys = ['recommendDoctor', 'diagnosisExplanationSatisfaction', 'diagnosisResponse'];
 
-  //   // }
-  //   // populateFields();
-  //   getFeedbackQuestions().then(questions => {
-  //     // console.log('data', data);
-  //     console.log('questions', questions);
-  //     setFeedbackQuestions(questions);
-  //   });
-  // }, []);
+  const formFields = [
+    <FormFieldWrapper key='recommendDoctor'>
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.recommendDoctor.description(patientFirstName, doctorLastName)}
+      </FormFieldInstructions>
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.recommendDoctor.instructions}
+      </FormFieldInstructions>
+      <input
+        type='number'
+        max={10}
+        min={1}
+        {...register('recommendDoctor', {
+          required: `${FEEDBACK_FORM_COPY.recommendDoctor.title} is a required field`,
+        })}
+      />
+      {errors.recommendDoctor ? <div>{errors.recommendDoctor.message}</div> : null}
+    </FormFieldWrapper>,
+    <FormFieldWrapper key='diagnosisExplanationSatisfaction'>
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.description(diagnosisTitle)}
+      </FormFieldInstructions>
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.instructions(doctorLastName)}
+      </FormFieldInstructions>
+      <select
+        {...register('diagnosisExplanationSatisfaction', {
+          required: `${FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title} is a required field`,
+        })}
+      >
+        <option value={'yes'}>Yes</option>
+        <option value={'no'}>No</option>
+      </select>
+      {errors.diagnosisExplanationSatisfaction ? (
+        <div>{errors.diagnosisExplanationSatisfaction.message}</div>
+      ) : null}
+      {/* <FormFieldWrapper > */}
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.diagnosisExplanationComment.instructions}
+      </FormFieldInstructions>
+      <textarea {...register('diagnosisExplanationComment')} />
+      {/* </FormFieldWrapper> */}
+    </FormFieldWrapper>,
+    <FormFieldWrapper key='diagnosisResponse'>
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.diagnosisResponse.description}
+      </FormFieldInstructions>
+      <FormFieldInstructions>
+        {FEEDBACK_FORM_COPY.diagnosisResponse.instructions(diagnosisTitle)}
+      </FormFieldInstructions>
+      <textarea
+        {...register('diagnosisResponse', {
+          required: `${FEEDBACK_FORM_COPY.diagnosisResponse.title} is a required field`,
+        })}
+      />
+      {errors.diagnosisResponse ? <div>{errors.diagnosisResponse.message}</div> : null}
+    </FormFieldWrapper>,
+  ];
+
+  const handleFormStepNavigation = (formStepId: number) => (event: MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    console.log('event', event);
+    // const triggered = await trigger();
+    // trigger('recommendDoctor');
+    trigger();
+    // if (triggered) { return; }
+    const newIndex = Math.max(Math.min(formStepId, formFields.length - 1), 0) % formFields.length;
+    trigger();
+    if (errors) {
+      console.log('triggered errors', errors);
+      if (errors['recommendDoctor'])
+        return;
+    }
+    // console.log('newFormStepIndex', newIndex);
+    setFormStep(newIndex);
+  };
 
   return (
     <>
-      <div>Form</div>
-      {/* {formStep} */}
-      feedbackQuestions
       {/*
-        TODO: dynamic parsing/rendering of feedback questions and flexible form fields by question config.
+        TODO: refactor for dynamic parsing/rendering of feedback questions and flexible form fields rendered by question config.
       {feedbackQuestions.map(question => (
         <div key={question.id}>{question.name}</div>
       ))} */}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FormFieldWrapper>
-          <div>
-            {FEEDBACK_FORM_COPY.recommendDoctor.description(patientFirstName, doctorLastName)}
-          </div>
-          <div>{FEEDBACK_FORM_COPY.recommendDoctor.instructions}</div>
-          <input
-            type='number'
-            max={10}
-            min={1}
-            {...register('recommendDoctor', { required: `${FEEDBACK_FORM_COPY.recommendDoctor.title} is a required field` })}
-          />
-          {errors.recommendDoctor ? <div>{errors.recommendDoctor.message}</div> : null}
-        </FormFieldWrapper>
-        <FormFieldWrapper>
-          <div>{FEEDBACK_FORM_COPY.diagnosisExplanation.description(diagnosisTitle)}</div>
-          <div>{FEEDBACK_FORM_COPY.diagnosisExplanation.instructions(doctorLastName)}</div>
-          <input {...register('diagnosisExplanation', { required: `${FEEDBACK_FORM_COPY.diagnosisExplanation.title} is a required field` })} />
-          {errors.diagnosisExplanation ? <div>{errors.diagnosisExplanation.message}</div> : null}
-        </FormFieldWrapper>
-        <FormFieldWrapper>
-          <div>{FEEDBACK_FORM_COPY.diagnosisExplanationComment.instructions}</div>
-          <textarea {...register('diagnosisExplanationComment')} />
-        </FormFieldWrapper>
-        <FormFieldWrapper>
-          <div>{FEEDBACK_FORM_COPY.diagnosisResponse.instructions(diagnosisTitle)}</div>
-          <textarea {...register('diagnosisResponse', { required: `${FEEDBACK_FORM_COPY.diagnosisResponse.title} is a required field` })} />
-          {errors.diagnosisResponse ? <div>{errors.diagnosisResponse.message}</div> : null}
-        </FormFieldWrapper>
 
-        <input type='submit' />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {formFields.map((FieldComponent, index) => {
+          return formStep === index ? (
+            <>
+              {FieldComponent}
+              <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
+                Back
+              </button>
+              <button
+                disabled={formStep === formFields.length - 1}
+                onClick={handleFormStepNavigation(formStep + 1)}
+              >
+                {' '}
+                Continue
+              </button>
+            </>
+          ) : (
+            <></>
+          );
+        })}
+        {formStep === formFields.length - 1 ? <input type='submit' /> : null}
       </form>
-      <button onClick={handleFormStepNavigation(formStep)}>Back</button>
-      <button>Continue</button>
     </>
   );
 }

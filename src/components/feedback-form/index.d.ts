@@ -11,7 +11,7 @@
 
 export type PatientFeedbackFormData = {
   recommendDoctor: number;
-  diagnosisExplanation: boolean;
+  diagnosisExplanationSatisfaction: string;
   diagnosisExplanationComment: string;
   diagnosisResponse: string;
 };

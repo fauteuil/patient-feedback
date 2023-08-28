@@ -7,9 +7,9 @@ export const FEEDBACK_FORM_COPY = {
       `Hi ${patientFirstName}, on a scale of 1-10, would you recommend Dr ${doctorLastName} to a friend or family member?`,
     instructions: '1 = Would not recommend, 10 = Would strongly recommend',
   },
-  diagnosisExplanation: {
+  diagnosisExplanationSatisfaction: {
     title: 'Explanation of Diagnosis Satisfaction',
-    description: (diagnosis: string) => `Thank you. You were diagnosed with ${diagnosis}.`,
+    description: (diagnosis: string) => `Thank you. You were diagnosed with '${diagnosis}'.`,
     instructions: (doctorLastName: string) =>
       `Did Dr ${doctorLastName} explain how to manage this diagnosis in a way you could understand?`,
   },

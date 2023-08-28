@@ -103,21 +103,25 @@
         "status": "",
         "questions": [
           {
-            "comment": "",
             "id": "blah-8ygvb-blah",
             "name": "recommendDoctor",
-            "value": "",
+            "value": 0,
             "valueType": "int"
           },
           {
-            "comment": "",
             "id": "blah-8yg3edcvb-blah",
-            "name": "diagnosisExplanation",
+            "name": "diagnosisExplanationSatisfaction",
             "value": "",
-            "valueType": "boolean"
+            "valueType": "string"
           },
           {
-            "id": "blah-8ygvb-blah",
+            "id": "blah-8ygvb-bl2wsah",
+            "name": "diagnosisExplanationComment",
+            "value": "",
+            "valueType": "string"
+          },
+          {
+            "id": "blah-8y2wsd-gvb-blah",
             "name": "diagnosisResponse",
             "value": "",
             "valueType": "string"
@@ -125,7 +129,7 @@
         ]
       },
       "diagnosis": {
-        "reference": "Diagnosis/be142dc6-93bd-11eb-a8b3-0242ac130003"
+        "reference": "Diagnosis/be142dc6-93bd-11eb-a8b3-0242ac-1309iujhbv"
       }
     }
   ]
