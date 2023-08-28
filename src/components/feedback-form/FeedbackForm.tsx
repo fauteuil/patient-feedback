@@ -6,12 +6,13 @@ import {
   Doctor,
   // FeedbackQuestion,
   Patient,
+  PatientFeedback,
   // PatientFeedback,
 } from '../../types';
 // import { useForm } from "react-hook-form";
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, FieldError } from 'react-hook-form';
 import { PatientFeedbackFormData } from '.';
-import { FEEDBACK_FORM_COPY } from './constants';
+import { DEFAULT_PATIENT_FEEDBACK_FORM_DATA, FEEDBACK_FORM_COPY } from './constants';
 import { FormFieldInstructions, FormFieldWrapper } from './FeedbackForm.styled';
 
 // function App() {
@@ -105,19 +106,19 @@ function getDiagnosisInfo(bundle?: Bundle): Diagnosis {
 // }
 
 /**
- * For viewing results saved to the bundle (stubbed)
+ * For viewing the PatientFeedback resource as parsed from the bundle (stubbed)
  * @todo - abstract to service call and render dynamically
  * @param {Bundle} bundle
  * @returns {PatientFeedback} patientFeedback
  */
-// function getPatientFeedbackInfo(bundle?: Bundle): PatientFeedback {
-//   const patientfeedback = bundle?.entry?.find(entryItem => {
-//     if (entryItem?.resource?.resourceType === 'PatientFeedback') {
-//       return entryItem?.resource;
-//     }
-//   });
-//   return patientfeedback?.resource as PatientFeedback;
-// }
+function getPatientFeedbackInfo(bundle?: Bundle): PatientFeedback {
+  const patientfeedback = bundle?.entry?.find(entryItem => {
+    if (entryItem?.resource?.resourceType === 'PatientFeedback') {
+      return entryItem?.resource;
+    }
+  });
+  return patientfeedback?.resource as PatientFeedback;
+}
 
 /**
  * Wizard for form completion
@@ -131,10 +132,20 @@ export function FeedbackForm() {
   // const { reset, handleSubmit, watch } = methods;
   const {
     register,
+    getFieldState,
     handleSubmit,
     formState: { errors },
     trigger,
-  } = useForm<PatientFeedbackFormData>({ mode: 'onTouched' });
+    clearErrors,
+    setFocus,
+  } = useForm<PatientFeedbackFormData>({
+    mode: 'onTouched',
+    defaultValues: {
+      recommendDoctor: undefined,
+      diagnosisExplanationSatisfaction: undefined,
+      diagnosisResponse: undefined,
+    },
+  });
 
   const [formStep, setFormStep] = useState<number>(0); //TOOD: manage form step by service response and/or app state library, e.g. ReactCcntext
   // const [feedbackQuestions, setFeedbackQuestions] = useState<FeedbackQuestion[]>([]);
@@ -146,10 +157,14 @@ export function FeedbackForm() {
   const [diagnosis, setDiagnosis] = useState<Diagnosis>();
   // const [appointment, setAppointment] = useState<Appointment>(); // TODO: parse and display appointment data for more complete context to the questionnaire
   // const [patientFeedback, setPatientFeedback] = useState<PatientFeedback>();
+  const [feedbackFormData, setFeedbackFormData] = useState<PatientFeedbackFormData>(
+    DEFAULT_PATIENT_FEEDBACK_FORM_DATA,
+  );
 
   // Pares and persist response data
   const onSubmit: SubmitHandler<PatientFeedbackFormData> = useCallback(feedbackFormData => {
     console.log('feedbackFormData', feedbackFormData);
+    setFeedbackFormData(feedbackFormData);
     // const updatedPatientFeedback = { ...patientFeedback };
     // (updatedPatientFeedback?.questions || []).forEach(question => { });
   }, []);
@@ -169,6 +184,32 @@ export function FeedbackForm() {
 
   // Fetch data to specify context for the form fields.
   useEffect(() => {
+
+
+    switch (formStep) {
+      case 0: {
+        setFocus('recommendDoctor');
+        break;
+      }
+      case 1: {
+        setFocus('diagnosisExplanationSatisfaction');
+        break;
+      }
+      case 2: {
+        setFocus('diagnosisResponse');
+        break;
+      }
+      default:
+        setFocus('recommendDoctor');
+    }
+
+
+
+
+    // setFocus('recommendDoctor');
+  }, [formStep, setFocus]);
+
+  useEffect(() => {
     fetchBundle().then(bundleResponse => {
       // console.log('data', data);
       console.log('bundle', bundleResponse);
@@ -180,7 +221,7 @@ export function FeedbackForm() {
     });
   }, []);
 
-  const formFieldKeys = ['recommendDoctor', 'diagnosisExplanationSatisfaction', 'diagnosisResponse'];
+  // const formFieldKeys = ['recommendDoctor', 'diagnosisExplanationSatisfaction', 'diagnosisResponse'];
 
   const formFields = [
     <FormFieldWrapper key='recommendDoctor'>
@@ -212,6 +253,7 @@ export function FeedbackForm() {
           required: `${FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title} is a required field`,
         })}
       >
+        <option value={''} selected>-</option>
         <option value={'yes'}>Yes</option>
         <option value={'no'}>No</option>
       </select>
@@ -241,21 +283,57 @@ export function FeedbackForm() {
     </FormFieldWrapper>,
   ];
 
-  const handleFormStepNavigation = (formStepId: number) => (event: MouseEvent<HTMLElement>) => {
+  const handleFormStepNavigation = (nextFormStepId: number) => async (
+    event: MouseEvent<HTMLElement>,
+  ) => {
     event.preventDefault();
+
+    // let formError = false;
+
     console.log('event', event);
     // const triggered = await trigger();
+    // trigger();
+    clearErrors();
+
     // trigger('recommendDoctor');
-    trigger();
     // if (triggered) { return; }
-    const newIndex = Math.max(Math.min(formStepId, formFields.length - 1), 0) % formFields.length;
-    trigger();
-    if (errors) {
-      console.log('triggered errors', errors);
-      if (errors['recommendDoctor'])
-        return;
+    const newIndex =
+      Math.max(Math.min(nextFormStepId, formFields.length - 1), 0) % formFields.length;
+    // trigger();
+
+    switch (formStep) {
+      case 0: {
+        // const recommendDoctorState = getFieldState('recommendDoctor');
+        // if (!recommendDoctorState.isTouched) {
+        //   return;
+        // }
+        // console.log('recommendDoctorInvalid', invalid);
+        await trigger('recommendDoctor');
+        // if (errors['recommendDoctor'])
+        //   return;
+        break;
+      }
+      case 1: {
+        setFocus('diagnosisExplanationSatisfaction');
+        const diagnosisExplanationSatisfactionState = getFieldState('recommendDoctor');
+        await trigger('diagnosisExplanationSatisfaction');
+        break;
+      }
+      case 2: {
+        setFocus('diagnosisResponse');
+        await trigger('diagnosisResponse');
+        break;
+      }
+      default:
+        clearErrors();
     }
-    // console.log('newFormStepIndex', newIndex);
+
+    if (Object.values(errors).length) {
+      console.log('triggered errors', errors);
+      // if (errors['recommendDoctor'])
+      return;
+    }
+    console.log('newFormStepIndex', newIndex);
     setFormStep(newIndex);
   };
 
@@ -266,7 +344,6 @@ export function FeedbackForm() {
       {feedbackQuestions.map(question => (
         <div key={question.id}>{question.name}</div>
       ))} */}
-
       <form onSubmit={handleSubmit(onSubmit)}>
         {formFields.map((FieldComponent, index) => {
           return formStep === index ? (
@@ -279,7 +356,6 @@ export function FeedbackForm() {
                 disabled={formStep === formFields.length - 1}
                 onClick={handleFormStepNavigation(formStep + 1)}
               >
-                {' '}
                 Continue
               </button>
             </>
@@ -289,6 +365,7 @@ export function FeedbackForm() {
         })}
         {formStep === formFields.length - 1 ? <input type='submit' /> : null}
       </form>
+      Results:{JSON.stringify(feedbackFormData, undefined, 2)}
     </>
   );
 }

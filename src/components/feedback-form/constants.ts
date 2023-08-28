@@ -1,4 +1,7 @@
 // TODO - Add types for dynamic question/form field population.
+
+import { PatientFeedbackFormData } from '.';
+
 // TODO - Add multiple versions of this or similar script for i18n considerations.
 export const FEEDBACK_FORM_COPY = {
   recommendDoctor: {
@@ -23,4 +26,11 @@ export const FEEDBACK_FORM_COPY = {
     instructions: (diagnosis: string) => `How do you feel about being diagnosed with ${diagnosis}?`,
   },
   feedbackCompletionHeader: 'Thanks again! Here’s what we heard:',
+};
+
+export const DEFAULT_PATIENT_FEEDBACK_FORM_DATA: PatientFeedbackFormData = {
+  recommendDoctor: 0,
+  diagnosisExplanationSatisfaction: '',
+  diagnosisExplanationComment: '',
+  diagnosisResponse: 'string',
 };
