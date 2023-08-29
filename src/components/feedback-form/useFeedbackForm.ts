@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Bundle, Patient, Doctor, Diagnosis, PatientFeedback } from '../../types';
+import { Bundle, Patient, Doctor, Diagnosis } from '../../types';
 // TODO: move utils back into hook, improve hook stubbing/testing
 import { getPatientInfo, getDoctorInfo, getDiagnosisInfo } from './feedback.utilities';
 
 export function useFeedbackForm() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [bundle, setBundle] = useState<Bundle>();
+  const [, setBundle] = useState<Bundle>();
   const [patient, setPatient] = useState<Patient>();
   const [doctor, setDoctor] = useState<Doctor>();
   const [diagnosis, setDiagnosis] = useState<Diagnosis>();
