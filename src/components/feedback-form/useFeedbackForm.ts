@@ -15,7 +15,7 @@ export function useFeedbackForm() {
   const fetchBundle = async () => {
     try {
       // TODO - update to Axios, et al for helper functionality. secure request config, etc
-      const response = await fetch('./src/test/test-data/patient-feedback-raw-data.json');
+      const response = await fetch('./src/assets/test-data/patient-feedback-raw-data.json');
       const bundle: Bundle = await response.json();
       return bundle;
     } catch (error) {

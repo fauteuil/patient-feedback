@@ -1,5 +1,5 @@
 import { getPatientInfo, getDoctorInfo } from './feedback.utilities';
-import bundleStub from '../../test/test-data/patient-feedback-raw-data.json';
+import bundleStub from '../../assets/test-data/patient-feedback-raw-data.json';
 import { Doctor, Patient } from '../../types';
 
 // Test bundle parsing logic
