@@ -210,6 +210,7 @@ export function FeedbackForm() {
             Back
           </button>
           <button
+            data-testid='button-continue'
             disabled={formStep === formFields.length - 1}
             onClick={handleFormStepNavigation(formStep + 1)}
           >

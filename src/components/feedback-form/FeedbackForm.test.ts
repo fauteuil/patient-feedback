@@ -1,22 +1,25 @@
 import { render, screen } from '@testing-library/react';
-// import { FeedbackForm } from './FeedbackForm';
 import { App } from '../../App';
 
-describe('FeedbackForm', () => {
+describe('Render App / FeedbackForm', () => {
   it('should render the component correctly', () => {
-    // const { getByText } = screen;
-    const { findByText } = screen;
+    const { findByText, findByTestId } = screen;
 
     render(App());
-    // render(FeedbackForm());
     expect(findByText('PATIENT FEEDBACK')).toBeDefined();
 
-    // expect(findByText('Hello, world!')).toBeInTheDocument();
+    expect(findByTestId('button-continue')).toBeDefined();
+    findByTestId('button-continue').then(button => button.click());
+    expect(findByText('Doctor Recommendation is a required field')).toBeDefined();
+  });
+
+  it('should show a form validation error', () => {
+    const { findByText, findByTestId } = screen;
+
+    render(App());
+
+    expect(findByTestId('button-continue')).toBeDefined();
+    findByTestId('button-continue').then(button => button.click());
+    expect(findByText('Doctor Recommendation is a required field')).toBeDefined();
   });
 });
-
-// test('render correctly', () => {
-//   render(<FeedbackForm />)
-//   const titleElement = screen.getRoleBy('heading')
-//   expect(titleElement).toBeInTheDocument()
-// }
