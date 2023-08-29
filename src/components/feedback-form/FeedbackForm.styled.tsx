@@ -6,7 +6,7 @@ export const FormWrapper = styled.form`
   flex-direction: column;
   position: relative;
   height: 30rem;
-  width: 35rem;
+  /* width: 35rem; */
   top: 0;
 `;
 
@@ -35,6 +35,7 @@ export const FormFieldWrapper = styled.div<Selected>`
 
   @media screen and (max-width: 48rem) {
     max-width: 27rem;
+    min-width: unset;
   }
 `;
 
@@ -73,9 +74,15 @@ export const SelectStyled = styled.select`
 export const InputStyled = styled.input`
   height: 2rem;
   min-width: 20rem;
+
+  @media screen and (max-width: 48rem) {
+    min-width: 13rem;  }
 `;
 
 export const TextareaStyled = styled.textarea`
   min-height: 4rem;
   min-width: 24rem;
+
+  @media screen and (max-width: 48rem) {
+    min-width: 13rem;  }
 `;

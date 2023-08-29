@@ -11,7 +11,7 @@ export const AppContainer = styled.div`
   font-synthesis: none;
   font-weight: 400;
   justify-content: center;
-  left: 50%;
+  left: 38%;
   line-height: 1.5;
   max-width: 62.5rem; // 1000px / 16px = 62.5rem
   position: absolute;
@@ -22,6 +22,7 @@ export const AppContainer = styled.div`
 
   @media screen and (max-width: 48rem) {
     flex-direction: column-reverse;
+    left: 50%;
   }
 `;
 
@@ -30,7 +31,7 @@ export const AppContent = styled.div`
   flex-direction: column;
   justify-content: center;
   padding: 3rem;
-  width: 100%;
+  /* width: 100%; */
 `;
 
 export const TitleContainer = styled.div`

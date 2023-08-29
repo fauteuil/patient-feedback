@@ -44,6 +44,8 @@ export function FeedbackForm() {
   const { diagnosisTitle, doctorLastName, patientFirstName } = useFeedbackForm();
 
   const [formStep, setFormStep] = useState<number>(0); //TOOD: manage form step by service response and/or app state library, e.g. ReactCcntext
+
+  // TODO: move to a service call and / or app state (React.Context) to break up form componments from feedback results.
   const [feedbackFormData, setFeedbackFormData] = useState<
     PatientFeedbackFormData & { complete: boolean }
   >({ ...DEFAULT_PATIENT_FEEDBACK_FORM_DATA, complete: false });
@@ -53,6 +55,7 @@ export function FeedbackForm() {
     console.log('feedbackFormData', feedbackFormData);
     setFeedbackFormData({ ...feedbackFormData, complete: true });
     setFormStep(-1);
+    // TODO: process form data for post to service/write to JSON in Bundle format
     // const updatedPatientFeedback = { ...patientFeedback };
     // (updatedPatientFeedback?.questions || []).forEach(question => { });
   }, []);
