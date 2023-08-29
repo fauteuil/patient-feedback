@@ -5,6 +5,8 @@ import { PatientFeedbackFormData } from '.';
 import { DEFAULT_PATIENT_FEEDBACK_FORM_DATA, FEEDBACK_FORM_COPY } from './constants';
 import {
   ButtonGroupWrapper,
+  FeedbackResponseDivider,
+  FeedbackWrapper,
   FormButtonWrapper,
   FormFieldControlWrapper,
   FormFieldDescription,
@@ -18,6 +20,7 @@ import {
   TextareaStyled,
 } from './FeedbackForm.styled';
 import { useFeedbackForm } from './useFeedbackForm';
+import { TitleContainer } from '../../App.styled';
 
 /**
  * Wizard for form completion
@@ -202,7 +205,6 @@ export function FeedbackForm() {
   function ButtonGroup() {
     return (
       <ButtonGroupWrapper>
-
         <FormButtonWrapper>
           <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
             Back
@@ -228,10 +230,35 @@ export function FeedbackForm() {
       ))} */}
 
       {feedbackFormData.complete ? (
-        <div>
-          {FEEDBACK_FORM_COPY.feedbackCompletionHeader}
-          <div>{JSON.stringify(feedbackFormData, undefined, 2)}</div>
-        </div>
+        // TODO: move to a dynamic feedback result display via question/format config
+        <FeedbackWrapper>
+          {/* <div>{JSON.stringify(feedbackFormData, undefined, 2)}</div> */}
+          <FormFieldHeader>
+            <TitleContainer>{FEEDBACK_FORM_COPY.feedbackCompletionHeader}</TitleContainer>
+          </FormFieldHeader>
+          <FeedbackResponseDivider />
+          <FormFieldDescription>{FEEDBACK_FORM_COPY.recommendDoctor.title}</FormFieldDescription>
+          <FormFieldInstructions>{feedbackFormData.recommendDoctor}</FormFieldInstructions>
+
+          <FeedbackResponseDivider />
+
+          <FormFieldDescription>
+            {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title}
+          </FormFieldDescription>
+          <FormFieldInstructions>
+            {feedbackFormData.diagnosisExplanationSatisfaction}
+          </FormFieldInstructions>
+          {feedbackFormData.diagnosisExplanationComment ? (
+            <FormFieldInstructions>
+              "{feedbackFormData.diagnosisExplanationComment}"
+            </FormFieldInstructions>
+          ) : null}
+
+          <FeedbackResponseDivider />
+
+          <FormFieldDescription>{FEEDBACK_FORM_COPY.diagnosisResponse.title}</FormFieldDescription>
+          <FormFieldInstructions>"{feedbackFormData.diagnosisResponse}"</FormFieldInstructions>
+        </FeedbackWrapper>
       ) : (
         <FormWrapper onSubmit={handleSubmit(onSubmit)}>
           {formFields}

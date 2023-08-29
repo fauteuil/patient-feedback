@@ -6,13 +6,12 @@ export const FormWrapper = styled.form`
   flex-direction: column;
   position: relative;
   height: 30rem;
-  /* width: 35rem; */
   top: 0;
 `;
 
 export const ButtonGroupWrapper = styled.div`
   position: absolute;
-  top: 32rem;
+  top: 33.5rem;
 `;
 
 export const FormButtonWrapper = styled.div`
@@ -86,3 +85,17 @@ export const TextareaStyled = styled.textarea`
   @media screen and (max-width: 48rem) {
     min-width: 13rem;  }
 `;
+
+export const FeedbackWrapper = styled.div`
+  padding: 1rem;
+  border-radius: 0.25rem;
+  border: solid 0.0625rem lightgray;
+`;
+
+export const FeedbackResponseDivider = styled.div`
+  padding: 1rem 0 0 0;
+  height: 0.25rem;
+  border-bottom: solid 0.0625rem lightgray;
+  width: 100% ;
+`;
+
