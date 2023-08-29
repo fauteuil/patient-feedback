@@ -9,6 +9,11 @@ export const FormWrapper = styled.form`
   top: 0;
 `;
 
+export const ButtonGroupWrapperReset = styled.div`
+  position: absolute;
+  top: 58rem;
+`;
+
 export const ButtonGroupWrapper = styled.div`
   position: absolute;
   top: 33.5rem;

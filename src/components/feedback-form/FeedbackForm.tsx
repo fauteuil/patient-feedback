@@ -4,6 +4,7 @@ import { PatientFeedbackFormData } from '.';
 import { DEFAULT_PATIENT_FEEDBACK_FORM_DATA, FEEDBACK_FORM_COPY } from './constants';
 import {
   ButtonGroupWrapper,
+  ButtonGroupWrapperReset,
   FormButtonWrapper,
   FormFieldControlWrapper,
   FormFieldDescription,
@@ -50,17 +51,34 @@ export function FeedbackForm() {
     PatientFeedbackFormData & { complete: boolean }
   >({ ...DEFAULT_PATIENT_FEEDBACK_FORM_DATA, complete: false });
 
-  // Pares and persist response data
-  const onSubmit: SubmitHandler<PatientFeedbackFormData> = useCallback(feedbackFormData => {
+  // TODO abstract logic and congifuration to persist and POST response data
+  // - parse into a Resource-like data structure
+  const onSubmit: SubmitHandler<PatientFeedbackFormData> = useCallback(async feedbackFormData => {
     console.log('feedbackFormData', feedbackFormData);
     setFeedbackFormData({ ...feedbackFormData, complete: true });
+
+    // POST data
+    try {
+      const response = await fetch('http://localhost:5000/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackFormData),
+      });
+
+      if (response.ok) {
+        console.log('Data submitted successfully', JSON.stringify(feedbackFormData));
+      } else {
+        console.error('Error submitting data');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+
     setFormStep(-1);
-    // TODO: process form data for post to service/write to JSON in Bundle format
-    // const updatedPatientFeedback = { ...patientFeedback };
-    // (updatedPatientFeedback?.questions || []).forEach(question => { });
   }, []);
 
-  // Fetch data to specify context for the form fields.
   useEffect(() => {
     switch (formStep) {
       case 0: {
@@ -84,7 +102,6 @@ export function FeedbackForm() {
   const formFields = [
     <FormFieldWrapper key='recommendDoctor' selected={formStep === 0}>
       <FormFieldHeader>
-        diagnosisResponse
         <FormFieldDescription>
           {FEEDBACK_FORM_COPY.recommendDoctor.description(patientFirstName, doctorLastName)}
         </FormFieldDescription>
@@ -200,6 +217,13 @@ export function FeedbackForm() {
     setFormStep(newIndex);
   };
 
+  const handleReset = (event: MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    console.log('reset');
+    clearErrors();
+    window.location.href = '/';
+  };
+
   // TODO: abstract to separate functional component
   function ButtonGroup() {
     return (
@@ -230,10 +254,19 @@ export function FeedbackForm() {
       ))} */}
 
       {feedbackFormData.complete ? (
-        <FeedbackResponse
-          responseContext={{ diagnosisTitle, doctorLastName, patientFirstName }}
-          responseData={feedbackFormData}
-        />
+        <>
+          <FeedbackResponse
+            responseContext={{ diagnosisTitle, doctorLastName, patientFirstName }}
+            responseData={feedbackFormData}
+          />
+          <ButtonGroupWrapperReset>
+            <FormButtonWrapper>
+              <button title='reset' onClick={handleReset}>
+                Reset
+              </button>
+            </FormButtonWrapper>
+          </ButtonGroupWrapperReset>
+        </>
       ) : (
         <FormWrapper onSubmit={handleSubmit(onSubmit)}>
           {formFields}
