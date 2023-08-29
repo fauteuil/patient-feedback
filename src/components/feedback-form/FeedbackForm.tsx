@@ -1,124 +1,10 @@
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  // Appointment,
-  Bundle,
-  Diagnosis,
-  Doctor,
-  // FeedbackQuestion,
-  Patient,
-  PatientFeedback,
-  // PatientFeedback,
-} from '../../types';
+import { MouseEvent, useCallback, useEffect, useState } from 'react';
 // import { useForm } from "react-hook-form";
-import { useForm, SubmitHandler, FieldError } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { PatientFeedbackFormData } from '.';
 import { DEFAULT_PATIENT_FEEDBACK_FORM_DATA, FEEDBACK_FORM_COPY } from './constants';
 import { FormFieldInstructions, FormFieldWrapper } from './FeedbackForm.styled';
-
-// function App() {
-//   const { register } = useForm<UserInput>();
-//   // ...
-// }
-// import { FeedbackQuestion } from "../../types";
-// import { FORM_STEP, FormStep } from "./index.d.ts";
-
-// TODO - abstract to a hook or client/service script for live data fetching
-const fetchBundle = async () => {
-  try {
-    // TODO - update to Axios, et al for helper functionality. secure request config, etc
-    const response = await fetch('./src/assets/test-data/patient-feedback-raw-data.json');
-    const bundle: Bundle = await response.json();
-    // const patientFeedback = bundle?.entry?.find(entryItem => {
-    //   if (entryItem?.resource?.resourceType === 'PatientFeedback') {
-    //     return entryItem?.resource;
-    //   }
-    // });
-    // const questions = ((patientFeedback?.resource as PatientFeedback)?.questions ||
-    //   []) as FeedbackQuestion[];
-    // return questions;
-
-    return bundle;
-  } catch (error) {
-    console.error('getData ERROR', error);
-    // return [] as FeedbackQuestion[];
-  }
-};
-
-// const getFeedbackQuestions = async () => {
-//   try {
-//     // TODO - update to Axios, et al for helper functionality. secure request header config, etc
-//     const response = await fetch('./src/assets/test-data/patient-feedback-raw-data.json');
-//     const bundle: Bundle = await response.json();
-//     const patientFeedback = bundle?.entry?.find(entryItem => {
-//       if (entryItem?.resource?.resourceType === 'PatientFeedback') {
-//         return entryItem?.resource;
-//       }
-//     });
-//     const questions = ((patientFeedback?.resource as PatientFeedback)?.questions ||
-//       []) as FeedbackQuestion[];
-
-//     return questions;
-//   } catch (error) {
-//     console.error('getData ERROR', error);
-//     return [] as FeedbackQuestion[];
-//   }
-// };
-
-/**
- * @todo - wrap individual resource parsing into useCallback()
- * @param {Bundle} bundle
- * @returns {Patient} patient
- */
-function getPatientInfo(bundle?: Bundle): Patient {
-  const patient = bundle?.entry?.find(entryItem => {
-    if (entryItem?.resource?.resourceType === 'Patient') {
-      return entryItem?.resource;
-    }
-  });
-  return patient?.resource as Patient;
-}
-
-function getDoctorInfo(bundle?: Bundle): Doctor {
-  const doctor = bundle?.entry?.find(entryItem => {
-    if (entryItem?.resource?.resourceType === 'Doctor') {
-      return entryItem?.resource;
-    }
-  });
-  return doctor?.resource as Doctor;
-}
-
-function getDiagnosisInfo(bundle?: Bundle): Diagnosis {
-  const diagnosis = bundle?.entry?.find(entryItem => {
-    if (entryItem?.resource?.resourceType === 'Diagnosis') {
-      return entryItem?.resource;
-    }
-  });
-  return diagnosis?.resource as Diagnosis;
-}
-
-// function getAppointmentInfo(bundle?: Bundle): Appointment {
-//   const appointment = bundle?.entry?.find(entryItem => {
-//     if (entryItem?.resource?.resourceType === 'Appointment') {
-//       return entryItem?.resource;
-//     }
-//   });
-//   return appointment?.resource as Appointment;
-// }
-
-/**
- * For viewing the PatientFeedback resource as parsed from the bundle (stubbed)
- * @todo - abstract to service call and render dynamically
- * @param {Bundle} bundle
- * @returns {PatientFeedback} patientFeedback
- */
-function getPatientFeedbackInfo(bundle?: Bundle): PatientFeedback {
-  const patientfeedback = bundle?.entry?.find(entryItem => {
-    if (entryItem?.resource?.resourceType === 'PatientFeedback') {
-      return entryItem?.resource;
-    }
-  });
-  return patientfeedback?.resource as PatientFeedback;
-}
+import { useFeedbackForm } from './useFeedbackForm';
 
 /**
  * Wizard for form completion
@@ -126,10 +12,6 @@ function getPatientFeedbackInfo(bundle?: Bundle): PatientFeedback {
  * @todo: Abstract wizard, step-based component for reuse.
  */
 export function FeedbackForm() {
-  // const { methods, register } = useForm<PatientFeedbackFormData>();
-  // const methods = useForm<PatientFeedbackFormData>();
-
-  // const { reset, handleSubmit, watch } = methods;
   const {
     register,
     // getFieldState,
@@ -147,16 +29,9 @@ export function FeedbackForm() {
     },
   });
 
-  const [formStep, setFormStep] = useState<number>(0); //TOOD: manage form step by service response and/or app state library, e.g. ReactCcntext
-  // const [feedbackQuestions, setFeedbackQuestions] = useState<FeedbackQuestion[]>([]);
+  const { diagnosisTitle, doctorLastName, patientFirstName } = useFeedbackForm();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [bundle, setBundle] = useState<Bundle>();
-  const [patient, setPatient] = useState<Patient>();
-  const [doctor, setDoctor] = useState<Doctor>();
-  const [diagnosis, setDiagnosis] = useState<Diagnosis>();
-  // const [appointment, setAppointment] = useState<Appointment>(); // TODO: parse and display appointment data for more complete context to the questionnaire
-  // const [patientFeedback, setPatientFeedback] = useState<PatientFeedback>();
+  const [formStep, setFormStep] = useState<number>(0); //TOOD: manage form step by service response and/or app state library, e.g. ReactCcntext
   const [feedbackFormData, setFeedbackFormData] = useState<
     PatientFeedbackFormData & { complete: boolean }
   >({ ...DEFAULT_PATIENT_FEEDBACK_FORM_DATA, complete: false });
@@ -169,19 +44,6 @@ export function FeedbackForm() {
     // const updatedPatientFeedback = { ...patientFeedback };
     // (updatedPatientFeedback?.questions || []).forEach(question => { });
   }, []);
-
-  // Display values
-  const patientFirstName = useMemo(() => {
-    return (patient?.name[0].given || ['[Patient First Name]']).join(' ');
-  }, [patient?.name]);
-  const doctorLastName = useMemo(() => {
-    return doctor?.name[0].family || '[Docotor Last Name]';
-  }, [doctor?.name]);
-  const diagnosisTitle = useMemo(() => {
-    return (
-      diagnosis?.code.coding.map(eachDiagnosis => eachDiagnosis.name).join(', ') || '[Diagnosis]'
-    );
-  }, [diagnosis?.code.coding]);
 
   // Fetch data to specify context for the form fields.
   useEffect(() => {
@@ -204,20 +66,6 @@ export function FeedbackForm() {
 
     // setFocus('recommendDoctor');
   }, [formStep, setFocus]);
-
-  useEffect(() => {
-    fetchBundle().then(bundleResponse => {
-      // console.log('data', data);
-      console.log('bundle', bundleResponse);
-      setBundle(bundleResponse);
-      setPatient(getPatientInfo(bundleResponse));
-      setDoctor(getDoctorInfo(bundleResponse));
-      // setAppointment(getAppointmentInfo(bundle));
-      setDiagnosis(getDiagnosisInfo(bundleResponse));
-    });
-  }, []);
-
-  // const formFieldKeys = ['recommendDoctor', 'diagnosisExplanationSatisfaction', 'diagnosisResponse'];
 
   const formFields = [
     <FormFieldWrapper key='recommendDoctor'>
@@ -286,39 +134,22 @@ export function FeedbackForm() {
   ) => {
     event.preventDefault();
 
-    // let formError = false;
-
     console.log('event', event);
-    // const triggered = await trigger();
-    // trigger();
     clearErrors();
 
-    // trigger('recommendDoctor');
-    // if (triggered) { return; }
     const newIndex =
       Math.max(Math.min(nextFormStepId, formFields.length - 1), 0) % formFields.length;
-    // trigger();
 
     switch (formStep) {
       case 0: {
-        // const recommendDoctorState = getFieldState('recommendDoctor');
-        // if (!recommendDoctorState.isTouched) {
-        //   return;
-        // }
-        // console.log('recommendDoctorInvalid', invalid);
         await trigger('recommendDoctor');
-        // if (errors['recommendDoctor'])
-        //   return;
         break;
       }
       case 1: {
-        // setFocus('diagnosisExplanationSatisfaction');
-        // const diagnosisExplanationSatisfactionState = getFieldState('recommendDoctor');
         await trigger('diagnosisExplanationSatisfaction');
         break;
       }
       case 2: {
-        // setFocus('diagnosisResponse');
         await trigger('diagnosisResponse');
         break;
       }
@@ -327,8 +158,7 @@ export function FeedbackForm() {
     }
 
     if (Object.values(errors).length) {
-      console.log('triggered errors', errors);
-      // if (errors['recommendDoctor'])
+      console.log('form errors', errors);
       return;
     }
     console.log('newFormStepIndex', newIndex);
