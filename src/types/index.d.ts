@@ -1,3 +1,6 @@
+export type Selected = { selected?: boolean };
+export type Offset = { offset?: number };
+
 export type Name = {
   text: string;
   family: string;

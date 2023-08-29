@@ -1,10 +1,22 @@
-import { MouseEvent, useCallback, useEffect, useState } from 'react';
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
 // import { useForm } from "react-hook-form";
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { PatientFeedbackFormData } from '.';
 import { DEFAULT_PATIENT_FEEDBACK_FORM_DATA, FEEDBACK_FORM_COPY } from './constants';
-import { FormFieldInstructions, FormFieldWrapper } from './FeedbackForm.styled';
+import {
+  FormButtonWrapper,
+  FormFieldControlWrapper,
+  FormFieldDescription,
+  FormFieldError,
+  FormFieldHeader,
+  // FormFieldCarouselWrapper,
+  FormFieldInstructions,
+  FormFieldWrapper,
+  FormViewWrapper,
+  FormWrapper,
+} from './FeedbackForm.styled';
 import { useFeedbackForm } from './useFeedbackForm';
+// import { Selected } from '../../types';
 
 /**
  * Wizard for form completion
@@ -14,7 +26,6 @@ import { useFeedbackForm } from './useFeedbackForm';
 export function FeedbackForm() {
   const {
     register,
-    // getFieldState,
     handleSubmit,
     formState: { errors },
     trigger,
@@ -63,71 +74,99 @@ export function FeedbackForm() {
       default:
         setFocus('recommendDoctor');
     }
-
-    // setFocus('recommendDoctor');
   }, [formStep, setFocus]);
 
+  // const formFields = useMemo(() => {
   const formFields = [
-    <FormFieldWrapper key='recommendDoctor'>
-      <FormFieldInstructions>
-        {FEEDBACK_FORM_COPY.recommendDoctor.description(patientFirstName, doctorLastName)}
-      </FormFieldInstructions>
+    <FormFieldWrapper key='recommendDoctor' selected={formStep === 0}>
+      <FormFieldHeader>
+        <FormFieldDescription>
+          {FEEDBACK_FORM_COPY.recommendDoctor.description(patientFirstName, doctorLastName)}
+        </FormFieldDescription>
+      </FormFieldHeader>
       <FormFieldInstructions>
         {FEEDBACK_FORM_COPY.recommendDoctor.instructions}
       </FormFieldInstructions>
-      <input
-        type='number'
-        max={10}
-        min={1}
-        {...register('recommendDoctor', {
-          required: `${FEEDBACK_FORM_COPY.recommendDoctor.title} is a required field`,
-        })}
-      />
-      {errors.recommendDoctor ? <div>{errors.recommendDoctor.message}</div> : null}
+      <FormFieldControlWrapper>
+        <input
+          type='number'
+          max={10}
+          min={1}
+          {...register('recommendDoctor', {
+            required: `${FEEDBACK_FORM_COPY.recommendDoctor.title} is a required field`,
+            min: 1,
+            max: 10,
+            validate: v => v >= 1 && v <= 10,
+          })}
+        />
+        {errors.recommendDoctor ? (
+          <FormFieldError>{errors.recommendDoctor.message}</FormFieldError>
+        ) : null}
+      </FormFieldControlWrapper>
     </FormFieldWrapper>,
-    <FormFieldWrapper key='diagnosisExplanationSatisfaction'>
-      <FormFieldInstructions>
-        {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.description(diagnosisTitle)}
-      </FormFieldInstructions>
+    <FormFieldWrapper key='diagnosisExplanationSatisfaction' selected={formStep === 1}>
+      <FormFieldHeader>
+        <FormFieldDescription>
+          {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.description(diagnosisTitle)}
+        </FormFieldDescription>
+      </FormFieldHeader>
       <FormFieldInstructions>
         {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.instructions(doctorLastName)}
       </FormFieldInstructions>
-      <select
-        {...register('diagnosisExplanationSatisfaction', {
-          required: `${FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title} is a required field`,
-        })}
-      >
-        <option value={''} selected>
-          -
-        </option>
-        <option value={'yes'}>Yes</option>
-        <option value={'no'}>No</option>
-      </select>
-      {errors.diagnosisExplanationSatisfaction ? (
-        <div>{errors.diagnosisExplanationSatisfaction.message}</div>
-      ) : null}
-      {/* <FormFieldWrapper > */}
+      <FormFieldControlWrapper>
+        <select
+          {...register('diagnosisExplanationSatisfaction', {
+            required: `${FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title} is a required field`,
+          })}
+        >
+          <option value={''} selected>
+            -
+          </option>
+          <option value={'yes'}>Yes</option>
+          <option value={'no'}>No</option>
+        </select>
+        {errors.diagnosisExplanationSatisfaction ? (
+          <FormFieldError>{errors.diagnosisExplanationSatisfaction.message}</FormFieldError>
+        ) : null}
+      </FormFieldControlWrapper>
       <FormFieldInstructions>
         {FEEDBACK_FORM_COPY.diagnosisExplanationComment.instructions}
       </FormFieldInstructions>
-      <textarea {...register('diagnosisExplanationComment')} />
-      {/* </FormFieldWrapper> */}
+      <FormFieldControlWrapper>
+        <textarea {...register('diagnosisExplanationComment')} />
+      </FormFieldControlWrapper>
     </FormFieldWrapper>,
-    <FormFieldWrapper key='diagnosisResponse'>
-      <FormFieldInstructions>
-        {FEEDBACK_FORM_COPY.diagnosisResponse.description}
-      </FormFieldInstructions>
-      <FormFieldInstructions>
-        {FEEDBACK_FORM_COPY.diagnosisResponse.instructions(diagnosisTitle)}
-      </FormFieldInstructions>
-      <textarea
-        {...register('diagnosisResponse', {
-          required: `${FEEDBACK_FORM_COPY.diagnosisResponse.title} is a required field`,
-        })}
-      />
-      {errors.diagnosisResponse ? <div>{errors.diagnosisResponse.message}</div> : null}
+    <FormFieldWrapper key='diagnosisResponse' selected={formStep === 2}>
+      <FormFieldHeader>
+        <FormFieldDescription>
+          {FEEDBACK_FORM_COPY.diagnosisResponse.description}
+        </FormFieldDescription>
+        <FormFieldInstructions>
+          {FEEDBACK_FORM_COPY.diagnosisResponse.instructions(diagnosisTitle)}
+        </FormFieldInstructions>
+      </FormFieldHeader>
+      <FormFieldControlWrapper>
+        <textarea
+          {...register('diagnosisResponse', {
+            required: `${FEEDBACK_FORM_COPY.diagnosisResponse.title} is a required field`,
+          })}
+        />
+        {errors.diagnosisResponse ? (
+          <FormFieldError>{errors.diagnosisResponse.message}</FormFieldError>
+        ) : null}
+      </FormFieldControlWrapper>
     </FormFieldWrapper>,
   ];
+  // }, [
+  //   diagnosisTitle,
+  //   doctorLastName,
+  //   errors.diagnosisExplanationSatisfaction,
+  //   errors.diagnosisResponse,
+  //   errors.recommendDoctor,
+  //   formStep,
+  //   patientFirstName,
+  //   register,
+  // ]);
 
   const handleFormStepNavigation = (nextFormStepId: number) => async (
     event: MouseEvent<HTMLElement>,
@@ -173,36 +212,36 @@ export function FeedbackForm() {
         <div key={question.id}>{question.name}</div>
       ))} */}
 
-
-      {feedbackFormData.complete ? (<div>{FEEDBACK_FORM_COPY.feedbackCompletionHeader}
+      {feedbackFormData.complete ? (
         <div>
-          {JSON.stringify(feedbackFormData, undefined, 2)}
+          {FEEDBACK_FORM_COPY.feedbackCompletionHeader}
+          <div>{JSON.stringify(feedbackFormData, undefined, 2)}</div>
         </div>
-      </div>) :
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-
-          {formFields.map((FieldComponent, index) => {
-            return formStep === index ? (
-              <>
-                {FieldComponent}
-                <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
-                  Back
-                </button>
-                <button
-                  disabled={formStep === formFields.length - 1}
-                  onClick={handleFormStepNavigation(formStep + 1)}
-                >
-                  Continue
-                </button>
-              </>
-            ) : (
-              <></>
-            );
-          })}
-          {formStep === formFields.length - 1 ? <input type='submit' /> : null}
-        </form>
-      }
+      ) : (
+        <FormWrapper onSubmit={handleSubmit(onSubmit)}>
+          {/* <FormViewWrapper> */}
+          {/* <FormFieldCarouselWrapper offset={(formStep + 1) * -3}> */}
+          {/*
+            {formFields.map((FieldComponent, index) => {
+              return formStep === index ? <>{FieldComponent}</> : <>{FieldComponent}</>;
+            })} */}
+          {formFields}
+          {/* </FormFieldCarouselWrapper> */}
+          {/* </FormViewWrapper> */}
+          <FormButtonWrapper>
+            <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
+              Back
+            </button>
+            <button
+              disabled={formStep === formFields.length - 1}
+              onClick={handleFormStepNavigation(formStep + 1)}
+            >
+              Continue
+            </button>
+            {formStep === formFields.length - 1 ? <input type='submit' /> : null}
+          </FormButtonWrapper>
+        </FormWrapper>
+      )}
     </>
   );
 }
