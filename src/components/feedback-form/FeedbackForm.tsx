@@ -4,19 +4,20 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { PatientFeedbackFormData } from '.';
 import { DEFAULT_PATIENT_FEEDBACK_FORM_DATA, FEEDBACK_FORM_COPY } from './constants';
 import {
+  ButtonGroupWrapper,
   FormButtonWrapper,
   FormFieldControlWrapper,
   FormFieldDescription,
   FormFieldError,
   FormFieldHeader,
-  // FormFieldCarouselWrapper,
   FormFieldInstructions,
   FormFieldWrapper,
-  FormViewWrapper,
   FormWrapper,
+  InputStyled,
+  SelectStyled,
+  TextareaStyled,
 } from './FeedbackForm.styled';
 import { useFeedbackForm } from './useFeedbackForm';
-// import { Selected } from '../../types';
 
 /**
  * Wizard for form completion
@@ -76,7 +77,6 @@ export function FeedbackForm() {
     }
   }, [formStep, setFocus]);
 
-  // const formFields = useMemo(() => {
   const formFields = [
     <FormFieldWrapper key='recommendDoctor' selected={formStep === 0}>
       <FormFieldHeader>
@@ -88,7 +88,7 @@ export function FeedbackForm() {
         {FEEDBACK_FORM_COPY.recommendDoctor.instructions}
       </FormFieldInstructions>
       <FormFieldControlWrapper>
-        <input
+        <InputStyled
           type='number'
           max={10}
           min={1}
@@ -114,7 +114,7 @@ export function FeedbackForm() {
         {FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.instructions(doctorLastName)}
       </FormFieldInstructions>
       <FormFieldControlWrapper>
-        <select
+        <SelectStyled
           {...register('diagnosisExplanationSatisfaction', {
             required: `${FEEDBACK_FORM_COPY.diagnosisExplanationSatisfaction.title} is a required field`,
           })}
@@ -124,7 +124,7 @@ export function FeedbackForm() {
           </option>
           <option value={'yes'}>Yes</option>
           <option value={'no'}>No</option>
-        </select>
+        </SelectStyled>
         {errors.diagnosisExplanationSatisfaction ? (
           <FormFieldError>{errors.diagnosisExplanationSatisfaction.message}</FormFieldError>
         ) : null}
@@ -133,7 +133,7 @@ export function FeedbackForm() {
         {FEEDBACK_FORM_COPY.diagnosisExplanationComment.instructions}
       </FormFieldInstructions>
       <FormFieldControlWrapper>
-        <textarea {...register('diagnosisExplanationComment')} />
+        <TextareaStyled {...register('diagnosisExplanationComment')} />
       </FormFieldControlWrapper>
     </FormFieldWrapper>,
     <FormFieldWrapper key='diagnosisResponse' selected={formStep === 2}>
@@ -146,7 +146,7 @@ export function FeedbackForm() {
         </FormFieldInstructions>
       </FormFieldHeader>
       <FormFieldControlWrapper>
-        <textarea
+        <TextareaStyled
           {...register('diagnosisResponse', {
             required: `${FEEDBACK_FORM_COPY.diagnosisResponse.title} is a required field`,
           })}
@@ -157,17 +157,8 @@ export function FeedbackForm() {
       </FormFieldControlWrapper>
     </FormFieldWrapper>,
   ];
-  // }, [
-  //   diagnosisTitle,
-  //   doctorLastName,
-  //   errors.diagnosisExplanationSatisfaction,
-  //   errors.diagnosisResponse,
-  //   errors.recommendDoctor,
-  //   formStep,
-  //   patientFirstName,
-  //   register,
-  // ]);
 
+  // TODO: abstract to hook
   const handleFormStepNavigation = (nextFormStepId: number) => async (
     event: MouseEvent<HTMLElement>,
   ) => {
@@ -204,6 +195,27 @@ export function FeedbackForm() {
     setFormStep(newIndex);
   };
 
+  // TODO: abstract to separate functional component
+  function ButtonGroup() {
+    return (
+      <ButtonGroupWrapper>
+
+        <FormButtonWrapper>
+          <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
+            Back
+          </button>
+          <button
+            disabled={formStep === formFields.length - 1}
+            onClick={handleFormStepNavigation(formStep + 1)}
+          >
+            Continue
+          </button>
+          {formStep === formFields.length - 1 ? <InputStyled type='submit' /> : null}
+        </FormButtonWrapper>
+      </ButtonGroupWrapper>
+    );
+  }
+
   return (
     <>
       {/*
@@ -219,27 +231,8 @@ export function FeedbackForm() {
         </div>
       ) : (
         <FormWrapper onSubmit={handleSubmit(onSubmit)}>
-          {/* <FormViewWrapper> */}
-          {/* <FormFieldCarouselWrapper offset={(formStep + 1) * -3}> */}
-          {/*
-            {formFields.map((FieldComponent, index) => {
-              return formStep === index ? <>{FieldComponent}</> : <>{FieldComponent}</>;
-            })} */}
           {formFields}
-          {/* </FormFieldCarouselWrapper> */}
-          {/* </FormViewWrapper> */}
-          <FormButtonWrapper>
-            <button disabled={formStep === 0} onClick={handleFormStepNavigation(formStep - 1)}>
-              Back
-            </button>
-            <button
-              disabled={formStep === formFields.length - 1}
-              onClick={handleFormStepNavigation(formStep + 1)}
-            >
-              Continue
-            </button>
-            {formStep === formFields.length - 1 ? <input type='submit' /> : null}
-          </FormButtonWrapper>
+          <ButtonGroup />
         </FormWrapper>
       )}
     </>
